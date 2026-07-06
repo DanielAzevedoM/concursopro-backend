@@ -1,21 +1,21 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Question } from './question.entity';
-import { MockExam } from './mock-exam.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Question } from "./question.entity";
+import { MockExam } from "./mock-exam.entity";
 
-@Entity('categories')
+@Entity("categories")
 export class Category {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column({ length: 255, unique: true })
   name: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   description: string;
 
-  @OneToMany(() => Question, question => question.category)
+  @OneToMany(() => Question, (question) => question.category)
   questions: Question[];
 
-  @OneToMany(() => MockExam, mockExam => mockExam.category)
+  @OneToMany(() => MockExam, (mockExam) => mockExam.category)
   mockExams: MockExam[];
 }
