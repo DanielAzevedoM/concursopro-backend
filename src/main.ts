@@ -9,7 +9,7 @@ async function bootstrap() {
   app.enableCors({
     // DICA: Para tirar a prova real, você pode trocar a linha abaixo por "origin: true,"
     // temporariamente. Se funcionar com true, você sabe que o erro era a variável de ambiente.
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: true,
 
     // Adicionado OPTIONS e PATCH (PATCH é muito comum em APIs REST)
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
