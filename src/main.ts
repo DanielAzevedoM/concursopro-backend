@@ -8,7 +8,7 @@ async function bootstrap() {
 
   // 1. Prefixo Global: Faz todas as rotas começarem com /api
   // Isso resolve o conflito com a sua variável VITE_API_URL do frontend
-  app.setGlobalPrefix("api");
+  // app.setGlobalPrefix("api");
 
   // 2. Configuração de CORS corrigida (com OPTIONS e PATCH)
   app.enableCors({
