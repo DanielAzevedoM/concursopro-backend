@@ -23,6 +23,13 @@ export class QuestionsService {
     return this.questionRepository.find({ where: { categoryId } });
   }
 
+  async getQuestionsByExam(examId: string) {
+    return this.questionRepository.find({ 
+      where: { examId },
+      select: ['id', 'categoryId', 'examId', 'text', 'subject', 'optionA', 'optionB', 'optionC', 'optionD', 'optionE', 'optionF'] // Do not send correctOption/explanation!
+    });
+  }
+
   async answerQuestion(user: User, request: AnswerQuestionDto) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

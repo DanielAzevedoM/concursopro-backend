@@ -16,6 +16,7 @@ import { AuthGuard } from "@nestjs/passport";
 
 @Controller("mock-exams")
 export class MockExamsController {
+  // eslint-disable-next-line prettier/prettier
   constructor(private readonly mockExamsService: MockExamsService) { }
 
   @UseGuards(AuthGuard("jwt"))

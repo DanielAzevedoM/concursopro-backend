@@ -9,6 +9,7 @@ import { QuestionsModule } from "./modules/questions.module";
 import { MockExamsModule } from "./modules/mock-exams.module";
 import { DashboardModule } from "./modules/dashboard.module";
 import { ReviewModule } from "./modules/review.module";
+import { AdminModule } from "./modules/admin.module";
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ReviewModule } from "./modules/review.module";
     MockExamsModule,
     DashboardModule,
     ReviewModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

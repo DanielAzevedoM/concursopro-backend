@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from "typeorm";
 import { Category } from "./category.entity";
+import { Exam } from "./exam.entity";
 import { UserQuestionInteraction } from "./user-question-interaction.entity";
 
 @Entity("questions")
@@ -23,8 +24,20 @@ export class Question {
   @JoinColumn({ name: "category_id" })
   category: Category;
 
+  @Column({ name: "exam_id", nullable: true })
+  examId: string;
+
+  @ManyToOne(() => Exam, (exam) => exam.questions, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "exam_id" })
+  exam: Exam;
+
   @Column({ type: "text" })
   text: string;
+
+  @Column({ length: 100, nullable: true })
+  subject: string;
 
   @Column({ name: "option_a", type: "text", nullable: true })
   optionA: string;

@@ -13,6 +13,7 @@ export class DashboardController {
     private interactionRepository: Repository<UserQuestionInteraction>,
     @InjectRepository(MockExam)
     private mockExamRepository: Repository<MockExam>,
+    // eslint-disable-next-line prettier/prettier
   ) { }
 
   @UseGuards(AuthGuard("jwt"))

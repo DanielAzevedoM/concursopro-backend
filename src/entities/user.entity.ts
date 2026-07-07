@@ -25,6 +25,9 @@ export class User {
   @Column({ name: "plan_type", length: 50 })
   planType: string;
 
+  @Column({ length: 20, default: "USER" })
+  role: string;
+
   @Column({ name: "daily_errors", default: 0 })
   dailyErrors: number;
 

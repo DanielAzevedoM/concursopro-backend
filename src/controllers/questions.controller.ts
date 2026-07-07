@@ -22,6 +22,11 @@ export class QuestionsController {
     return this.questionsService.getQuestionsByCategory(categoryId);
   }
 
+  @Get("exam/:examId")
+  getQuestionsByExam(@Param("examId") examId: string) {
+    return this.questionsService.getQuestionsByExam(examId);
+  }
+
   @UseGuards(AuthGuard("jwt"))
   @Post("answer")
   answerQuestion(
