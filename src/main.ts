@@ -6,17 +6,18 @@ import { TransformInterceptor } from "./interceptors/transform.interceptor";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // 1. Prefixo Global: Faz todas as rotas começarem com /api
+  // Isso resolve o conflito com a sua variável VITE_API_URL do frontend
+  app.setGlobalPrefix("api");
+
+  // 2. Configuração de CORS corrigida (com OPTIONS e PATCH)
   app.enableCors({
-    // DICA: Para tirar a prova real, você pode trocar a linha abaixo por "origin: true,"
-    // temporariamente. Se funcionar com true, você sabe que o erro era a variável de ambiente.
-    origin: true,
-
-    // Adicionado OPTIONS e PATCH (PATCH é muito comum em APIs REST)
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-
     credentials: true,
   });
 
+  // 3. Validações e Interceptors mantidos perfeitamente
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -26,8 +27,9 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // Adicionado o "0.0.0.0" para garantir que a porta ouça requisições externas na Hostinger
-  await app.listen(process.env.PORT ?? 8080, "0.0.0.0");
+  // 4. Porta Dinâmica e Liberação de IP Externo (Crucial para a Hostinger)
+  const port = process.env.PORT || 3000;
+  await app.listen(port, "0.0.0.0");
 }
 
 bootstrap().catch((err) => {
