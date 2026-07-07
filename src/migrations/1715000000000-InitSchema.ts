@@ -11,7 +11,6 @@ export class InitSchema1715000000000 implements MigrationInterface {
           email VARCHAR(255) NOT NULL UNIQUE,
           password VARCHAR(255) NOT NULL,
           plan_type VARCHAR(50) NOT NULL,
-          role VARCHAR(20) NOT NULL DEFAULT 'USER',
           daily_errors INT NOT NULL DEFAULT 0,
           last_error_reset DATE NOT NULL,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
