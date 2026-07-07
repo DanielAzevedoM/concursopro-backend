@@ -30,12 +30,12 @@ export class MockExam {
   @JoinColumn({ name: "category_id" })
   category: Category;
 
-  @CreateDateColumn({ name: "started_at", type: "timestamp without time zone" })
+  @CreateDateColumn({ name: "started_at", type: "timestamp" })
   startedAt: Date;
 
   @Column({
     name: "finished_at",
-    type: "timestamp without time zone",
+    type: "timestamp",
     nullable: true,
   })
   finishedAt: Date;

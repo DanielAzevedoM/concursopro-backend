@@ -38,7 +38,7 @@ export class UserQuestionInteraction {
 
   @CreateDateColumn({
     name: "answered_at",
-    type: "timestamp without time zone",
+    type: "timestamp",
   })
   answeredAt: Date;
 }

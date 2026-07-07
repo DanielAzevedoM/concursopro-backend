@@ -1,27 +1,27 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class InitSchema1715000000000 implements MigrationInterface {
-  name = 'InitSchema1715000000000';
+  name = "InitSchema1715000000000";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS users (
-          id UUID PRIMARY KEY,
+          id VARCHAR(36) PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
           email VARCHAR(255) NOT NULL UNIQUE,
           password VARCHAR(255) NOT NULL,
           plan_type VARCHAR(50) NOT NULL,
           daily_errors INT NOT NULL DEFAULT 0,
           last_error_reset DATE NOT NULL,
-          created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
           reset_code VARCHAR(6),
-          reset_code_expiry TIMESTAMP
+          reset_code_expiry TIMESTAMP NULL
       );
     `);
 
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS categories (
-          id UUID PRIMARY KEY,
+          id VARCHAR(36) PRIMARY KEY,
           name VARCHAR(255) NOT NULL UNIQUE,
           description TEXT
       );
@@ -29,8 +29,8 @@ export class InitSchema1715000000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS questions (
-          id UUID PRIMARY KEY,
-          category_id UUID NOT NULL,
+          id VARCHAR(36) PRIMARY KEY,
+          category_id VARCHAR(36) NOT NULL,
           text TEXT NOT NULL,
           option_a TEXT,
           option_b TEXT,
@@ -46,12 +46,12 @@ export class InitSchema1715000000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS user_question_interactions (
-          id UUID PRIMARY KEY,
-          user_id UUID NOT NULL,
-          question_id UUID NOT NULL,
+          id VARCHAR(36) PRIMARY KEY,
+          user_id VARCHAR(36) NOT NULL,
+          question_id VARCHAR(36) NOT NULL,
           is_correct BOOLEAN NOT NULL,
           is_reviewed BOOLEAN NOT NULL DEFAULT FALSE,
-          answered_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
           CONSTRAINT fk_user_interaction FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
           CONSTRAINT fk_question_interaction FOREIGN KEY (question_id) REFERENCES questions (id) ON DELETE CASCADE
       );
@@ -59,11 +59,11 @@ export class InitSchema1715000000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS mock_exams (
-          id UUID PRIMARY KEY,
-          user_id UUID NOT NULL,
-          category_id UUID NOT NULL,
-          started_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          finished_at TIMESTAMP WITHOUT TIME ZONE,
+          id VARCHAR(36) PRIMARY KEY,
+          user_id VARCHAR(36) NOT NULL,
+          category_id VARCHAR(36) NOT NULL,
+          started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          finished_at TIMESTAMP NULL,
           total_questions INT NOT NULL DEFAULT 0,
           correct_answers INT NOT NULL DEFAULT 0,
           CONSTRAINT fk_user_mock FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,

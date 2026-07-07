@@ -31,7 +31,7 @@ export class User {
   @Column({ name: "last_error_reset", type: "date" })
   lastErrorReset: Date;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamp without time zone" })
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
   createdAt: Date;
 
   @Column({ name: "reset_code", type: "varchar", length: 6, nullable: true })
