@@ -24,11 +24,45 @@ export class AdminCategoriesService {
   }
 
   async findAllExams() {
-    return this.examRepository.find({ relations: ["category"] });
+    return this.examRepository
+      .createQueryBuilder("exam")
+      .leftJoinAndSelect("exam.category", "category")
+      .loadRelationCountAndMap("exam.questionsCount", "exam.questions")
+      .getMany();
+  }
+
+  async findOneExam(id: string) {
+    return this.examRepository.findOne({
+      where: { id },
+      relations: ["category", "questions"],
+    });
   }
 
   async createExam(data: Partial<Exam>) {
     const exam = this.examRepository.create(data);
     return this.examRepository.save(exam);
+  }
+
+  async updateCategory(id: string, data: Partial<Category>) {
+    await this.categoryRepository.update(id, data);
+    return this.categoryRepository.findOne({ where: { id } });
+  }
+
+  async deleteCategory(id: string) {
+    await this.categoryRepository.delete(id);
+    return { success: true };
+  }
+
+  async updateExam(id: string, data: Partial<Exam>) {
+    await this.examRepository.update(id, data);
+    return this.examRepository.findOne({
+      where: { id },
+      relations: ["category"],
+    });
+  }
+
+  async deleteExam(id: string) {
+    await this.examRepository.delete(id);
+    return { success: true };
   }
 }

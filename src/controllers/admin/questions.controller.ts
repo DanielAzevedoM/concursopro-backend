@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Body,
   Param,
@@ -10,7 +11,6 @@ import {
 import { AuthGuard } from "@nestjs/passport";
 import { AdminGuard } from "../../security/admin.guard";
 import { AdminQuestionsService } from "../../services/admin/questions.service";
-import { DeepPartial } from "typeorm";
 import { Question } from "../../entities/question.entity";
 
 @Controller("admin/questions")
@@ -25,12 +25,22 @@ export class AdminQuestionsController {
   }
 
   @Post("bulk")
-  createBulk(@Body("questions") questions: DeepPartial<Question>[]) {
+  createBulk(@Body("questions") questions: Partial<Question>[]) {
     return this.adminQuestionsService.createBulk(questions);
   }
 
   @Delete(":id")
   delete(@Param("id") id: string) {
     return this.adminQuestionsService.delete(id);
+  }
+
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return this.adminQuestionsService.findOne(id);
+  }
+
+  @Put(":id")
+  update(@Param("id") id: string, @Body() data: Partial<Question>) {
+    return this.adminQuestionsService.update(id, data);
   }
 }

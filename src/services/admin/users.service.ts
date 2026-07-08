@@ -1,7 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "../../entities/user.entity";
+import { AdminUpdateUserDto } from "../../dto/admin-update-user.dto";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AdminUsersService {
@@ -23,6 +25,29 @@ export class AdminUsersService {
         "createdAt",
       ],
     });
+  }
+
+  async findOne(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: ["id", "name", "email", "planType", "role"],
+    });
+    if (!user) throw new NotFoundException("Usuário não encontrado");
+    return user;
+  }
+
+  async update(id: string, updateData: AdminUpdateUserDto) {
+    const user = await this.findOne(id);
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    } else {
+      delete updateData.password;
+    }
+
+    Object.assign(user, updateData);
+    await this.userRepository.save(user);
+    return user;
   }
 
   async delete(id: string) {

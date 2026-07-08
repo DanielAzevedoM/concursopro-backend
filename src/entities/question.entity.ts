@@ -33,11 +33,17 @@ export class Question {
   @JoinColumn({ name: "exam_id" })
   exam: Exam;
 
+  @Column({ type: "varchar", length: 50, default: "MULTIPLE_CHOICE" })
+  type: string;
+
   @Column({ type: "text" })
   text: string;
 
   @Column({ length: 100, nullable: true })
   subject: string;
+
+  @Column({ name: "image_url", type: "longtext", nullable: true })
+  imageUrl: string;
 
   @Column({ name: "option_a", type: "text", nullable: true })
   optionA: string;

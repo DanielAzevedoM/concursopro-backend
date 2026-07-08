@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Question } from "./question.entity";
 import { MockExam } from "./mock-exam.entity";
 import { Exam } from "./exam.entity";
+import { UserCategory } from "./user-category.entity";
 
 @Entity("categories")
 export class Category {
@@ -22,4 +23,7 @@ export class Category {
 
   @OneToMany(() => Exam, (exam) => exam.category)
   exams: Exam[];
+
+  @OneToMany(() => UserCategory, (uc) => uc.category)
+  userEnrollments: UserCategory[];
 }

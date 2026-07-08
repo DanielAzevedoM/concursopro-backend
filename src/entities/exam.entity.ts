@@ -32,6 +32,9 @@ export class Exam {
   @Column({ length: 255, nullable: true })
   institution: string;
 
+  @Column({ length: 255, nullable: true })
+  role: string;
+
   @OneToMany(() => Question, (question) => question.exam)
   questions: Question[];
 }

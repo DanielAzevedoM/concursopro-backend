@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { UserQuestionInteraction } from "./user-question-interaction.entity";
 import { MockExam } from "./mock-exam.entity";
+import { UserCategory } from "./user-category.entity";
 
 @Entity("users")
 export class User {
@@ -48,4 +49,7 @@ export class User {
 
   @OneToMany(() => MockExam, (mockExam) => mockExam.user)
   mockExams: MockExam[];
+
+  @OneToMany(() => UserCategory, (uc) => uc.user)
+  categoryEnrollments: UserCategory[];
 }

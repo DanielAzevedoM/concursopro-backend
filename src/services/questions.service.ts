@@ -1,10 +1,14 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Question } from '../entities/question.entity';
-import { User } from '../entities/user.entity';
-import { UserQuestionInteraction } from '../entities/user-question-interaction.entity';
-import { AnswerQuestionDto } from '../dto/answer-question.dto';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Question } from "../entities/question.entity";
+import { User } from "../entities/user.entity";
+import { UserQuestionInteraction } from "../entities/user-question-interaction.entity";
+import { AnswerQuestionDto } from "../dto/answer-question.dto";
 
 @Injectable()
 export class QuestionsService {
@@ -24,9 +28,21 @@ export class QuestionsService {
   }
 
   async getQuestionsByExam(examId: string) {
-    return this.questionRepository.find({ 
+    return this.questionRepository.find({
       where: { examId },
-      select: ['id', 'categoryId', 'examId', 'text', 'subject', 'optionA', 'optionB', 'optionC', 'optionD', 'optionE', 'optionF'] // Do not send correctOption/explanation!
+      select: [
+        "id",
+        "categoryId",
+        "examId",
+        "text",
+        "subject",
+        "optionA",
+        "optionB",
+        "optionC",
+        "optionD",
+        "optionE",
+        "optionF",
+      ], // Do not send correctOption/explanation!
     });
   }
 
@@ -45,18 +61,27 @@ export class QuestionsService {
     }
 
     // Free Plan check
-    if (user.planType === 'FREE' && user.dailyErrors >= this.MAX_DAILY_ERRORS_FREE) {
-      throw new BadRequestException(`Você atingiu o limite de ${this.MAX_DAILY_ERRORS_FREE} erros diários no plano gratuito. Assine o Pro ou tente amanhã.`);
+    if (
+      user.planType === "FREE" &&
+      user.dailyErrors >= this.MAX_DAILY_ERRORS_FREE
+    ) {
+      throw new BadRequestException(
+        `Você atingiu o limite de ${this.MAX_DAILY_ERRORS_FREE} erros diários no plano gratuito. Assine o Pro ou tente amanhã.`,
+      );
     }
 
-    const question = await this.questionRepository.findOne({ where: { id: request.questionId } });
+    const question = await this.questionRepository.findOne({
+      where: { id: request.questionId },
+    });
     if (!question) {
-      throw new NotFoundException('Questão não encontrada');
+      throw new NotFoundException("Questão não encontrada");
     }
 
-    const isCorrect = question.correctOption.toLowerCase() === request.selectedOption.toLowerCase();
+    const isCorrect =
+      question.correctOption.toLowerCase() ===
+      request.selectedOption.toLowerCase();
 
-    if (!isCorrect && user.planType === 'FREE') {
+    if (!isCorrect && user.planType === "FREE") {
       user.dailyErrors += 1;
       await this.userRepository.save(user);
     }
@@ -69,8 +94,11 @@ export class QuestionsService {
     });
     await this.interactionRepository.save(interaction);
 
-    const remainingLives = user.planType === 'FREE' ? Math.max(0, this.MAX_DAILY_ERRORS_FREE - user.dailyErrors) : -1;
-    const message = isCorrect ? 'Resposta correta!' : 'Resposta incorreta.';
+    const remainingLives =
+      user.planType === "FREE"
+        ? Math.max(0, this.MAX_DAILY_ERRORS_FREE - user.dailyErrors)
+        : -1;
+    const message = isCorrect ? "Resposta correta!" : "Resposta incorreta.";
 
     return {
       isCorrect,
