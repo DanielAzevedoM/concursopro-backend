@@ -35,7 +35,7 @@ async function bootstrap() {
 
   // 4. Porta Dinâmica e Liberação de IP Externo (Crucial para a Hostinger)
   const port = process.env.PORT || 3000;
-  await app.listen(port, "0.0.0.0");
+  await app.listen(port);
 }
 
 bootstrap().catch((err) => {
