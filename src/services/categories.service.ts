@@ -76,8 +76,8 @@ export class CategoriesService {
     const subjectsMap: Record<string, number> = {};
     let totalQuestions = 0;
 
-    category.exams.forEach((exam) => {
-      exam.questions.forEach((q) => {
+    category.exams?.forEach((exam) => {
+      exam.questions?.forEach((q) => {
         totalQuestions++;
         const subject = q.subject || "Outros";
         subjectsMap[subject] = (subjectsMap[subject] || 0) + 1;
@@ -90,13 +90,14 @@ export class CategoriesService {
         name: category.name,
         description: category.description,
       },
-      exams: category.exams.map((e) => ({
-        id: e.id,
-        name: e.name,
-        year: e.year,
-        institution: e.institution,
-        questionsCount: e.questions ? e.questions.length : 0,
-      })),
+      exams:
+        category.exams?.map((e) => ({
+          id: e.id,
+          name: e.name,
+          year: e.year,
+          institution: e.institution,
+          questionsCount: e.questions ? e.questions.length : 0,
+        })) || [],
       totalQuestions,
       subjects: subjectsMap,
     };
