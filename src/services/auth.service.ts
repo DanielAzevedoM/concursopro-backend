@@ -73,6 +73,41 @@ export class AuthService {
       throw new UnauthorizedException("Credenciais inválidas");
     }
 
+    const today = new Date();
+    // Local date string for today
+    const todayStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+    let userLastLoginStr = null;
+    let diffDays = 0;
+
+    if (user.lastLoginDate) {
+      const loginStr = typeof user.lastLoginDate === 'string' 
+          ? user.lastLoginDate 
+          : (user.lastLoginDate as Date).toISOString();
+      userLastLoginStr = loginStr.split('T')[0];
+        
+      // Calculate difference in days (ignoring time)
+      const d1 = new Date(todayStr);
+      const d2 = new Date(userLastLoginStr);
+      diffDays = Math.round((d1.getTime() - d2.getTime()) / (1000 * 3600 * 24));
+    }
+
+    if (!userLastLoginStr) {
+      user.consecutiveLoginDays = 1;
+      user.lastLoginDate = today;
+      await this.userRepository.save(user);
+    } else {
+      if (diffDays === 1) {
+        user.consecutiveLoginDays = (user.consecutiveLoginDays || 0) + 1;
+        user.lastLoginDate = today;
+        await this.userRepository.save(user);
+      } else if (diffDays > 1) {
+        user.consecutiveLoginDays = 1;
+        user.lastLoginDate = today;
+        await this.userRepository.save(user);
+      }
+    }
+
     const payload = { sub: user.email, id: user.id };
     const jwtToken = this.jwtService.sign(payload);
 

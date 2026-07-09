@@ -6,8 +6,7 @@ import {
   JoinColumn,
   OneToMany,
 } from "typeorm";
-import { Category } from "./category.entity";
-import { Exam } from "./exam.entity";
+import { QuestionScope } from "./question-scope.entity";
 import { UserQuestionInteraction } from "./user-question-interaction.entity";
 
 @Entity("questions")
@@ -15,23 +14,14 @@ export class Question {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ name: "category_id" })
-  categoryId: string;
+  @Column({ name: "question_scope_id" })
+  questionScopeId: string;
 
-  @ManyToOne(() => Category, (category) => category.questions, {
+  @ManyToOne(() => QuestionScope, (scope) => scope.questions, {
     onDelete: "CASCADE",
   })
-  @JoinColumn({ name: "category_id" })
-  category: Category;
-
-  @Column({ name: "exam_id", nullable: true })
-  examId: string;
-
-  @ManyToOne(() => Exam, (exam) => exam.questions, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn({ name: "exam_id" })
-  exam: Exam;
+  @JoinColumn({ name: "question_scope_id" })
+  scope: QuestionScope;
 
   @Column({ type: "varchar", length: 50, default: "MULTIPLE_CHOICE" })
   type: string;
@@ -41,9 +31,6 @@ export class Question {
 
   @Column({ length: 100, nullable: true })
   subject: string;
-
-  @Column({ name: "image_url", type: "longtext", nullable: true })
-  imageUrl: string;
 
   @Column({ name: "option_a", type: "text", nullable: true })
   optionA: string;

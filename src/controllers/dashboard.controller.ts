@@ -21,15 +21,6 @@ export class DashboardController {
   async getDashboardMetrics(@Request() req: { user: User }) {
     const user = req.user;
 
-    const totalQuestionsSolved = await this.interactionRepository.count({
-      where: { userId: user.id },
-    });
-    const totalQuestionsCorrect = await this.interactionRepository.count({
-      where: { userId: user.id, isCorrect: true },
-    });
-    const totalQuestionsReviewed = await this.interactionRepository.count({
-      where: { userId: user.id, isReviewed: true },
-    });
     const totalMockExamsCompleted = await this.mockExamRepository.count({
       where: { userId: user.id },
     });
@@ -37,10 +28,11 @@ export class DashboardController {
     return {
       planType: user.planType,
       dailyErrors: user.dailyErrors,
-      totalQuestionsSolved,
-      totalQuestionsCorrect,
-      totalQuestionsReviewed,
+      totalQuestionsSolved: user.totalQuestionsAnswered,
+      totalQuestionsCorrect: user.totalQuestionsCorrect,
+      totalQuestionsReviewed: user.totalQuestionsRevised,
       totalMockExamsCompleted,
+      consecutiveLoginDays: user.consecutiveLoginDays,
     };
   }
 }

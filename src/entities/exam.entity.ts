@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from "typeorm";
 import { Category } from "./category.entity";
-import { Question } from "./question.entity";
+import { QuestionScope } from "./question-scope.entity";
 
 @Entity("exams")
 export class Exam {
@@ -35,6 +35,6 @@ export class Exam {
   @Column({ length: 255, nullable: true })
   role: string;
 
-  @OneToMany(() => Question, (question) => question.exam)
-  questions: Question[];
+  @OneToMany(() => QuestionScope, (scope) => scope.exam)
+  questionScopes: QuestionScope[];
 }

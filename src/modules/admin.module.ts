@@ -4,6 +4,7 @@ import { User } from "../entities/user.entity";
 import { Category } from "../entities/category.entity";
 import { Exam } from "../entities/exam.entity";
 import { Question } from "../entities/question.entity";
+import { QuestionScope } from "../entities/question-scope.entity";
 
 import { AdminUsersController } from "../controllers/admin/users.controller";
 import { AdminCategoriesController } from "../controllers/admin/categories.controller";
@@ -14,7 +15,9 @@ import { AdminCategoriesService } from "../services/admin/categories.service";
 import { AdminQuestionsService } from "../services/admin/questions.service";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Category, Exam, Question])],
+  imports: [
+    TypeOrmModule.forFeature([User, Category, Exam, Question, QuestionScope]),
+  ],
   controllers: [
     AdminUsersController,
     AdminCategoriesController,

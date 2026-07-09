@@ -13,11 +13,15 @@ export class UserCategory {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ManyToOne(() => User, (user) => user.categoryEnrollments, { onDelete: "CASCADE" })
+  @ManyToOne(() => User, (user) => user.categoryEnrollments, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @ManyToOne(() => Category, (category) => category.userEnrollments, { onDelete: "CASCADE" })
+  @ManyToOne(() => Category, (category) => category.userEnrollments, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "category_id" })
   category: Category;
 

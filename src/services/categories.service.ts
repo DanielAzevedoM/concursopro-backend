@@ -26,7 +26,8 @@ export class CategoriesService {
     const categories = await this.categoryRepository
       .createQueryBuilder("category")
       .leftJoin("category.exams", "exam")
-      .leftJoin("exam.questions", "question")
+      .leftJoin("exam.questionScopes", "scope")
+      .leftJoin("scope.questions", "question")
       .select(["category.id", "category.name", "category.description"])
       .addSelect("COUNT(DISTINCT exam.id)", "examsCount")
       .addSelect("COUNT(DISTINCT question.id)", "questionsCount")
@@ -68,7 +69,11 @@ export class CategoriesService {
   async getCategoryDetails(categoryId: string) {
     const category = await this.categoryRepository.findOne({
       where: { id: categoryId },
-      relations: ["exams", "exams.questions"],
+      relations: [
+        "exams",
+        "exams.questionScopes",
+        "exams.questionScopes.questions",
+      ],
     });
 
     if (!category) return null;
@@ -77,10 +82,12 @@ export class CategoriesService {
     let totalQuestions = 0;
 
     category.exams?.forEach((exam) => {
-      exam.questions?.forEach((q) => {
-        totalQuestions++;
-        const subject = q.subject || "Outros";
-        subjectsMap[subject] = (subjectsMap[subject] || 0) + 1;
+      exam.questionScopes?.forEach((scope) => {
+        scope.questions?.forEach((q) => {
+          totalQuestions++;
+          const subject = q.subject || "Outros";
+          subjectsMap[subject] = (subjectsMap[subject] || 0) + 1;
+        });
       });
     });
 
@@ -91,13 +98,19 @@ export class CategoriesService {
         description: category.description,
       },
       exams:
-        category.exams?.map((e) => ({
-          id: e.id,
-          name: e.name,
-          year: e.year,
-          institution: e.institution,
-          questionsCount: e.questions ? e.questions.length : 0,
-        })) || [],
+        category.exams?.map((e) => {
+          let questionsCount = 0;
+          e.questionScopes?.forEach((s) => {
+            questionsCount += s.questions?.length || 0;
+          });
+          return {
+            id: e.id,
+            name: e.name,
+            year: e.year,
+            institution: e.institution,
+            questionsCount,
+          };
+        }) || [],
       totalQuestions,
       subjects: subjectsMap,
     };

@@ -2,9 +2,14 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { TransformInterceptor } from "./interceptors/transform.interceptor";
+import { json, urlencoded } from "express";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Aumentar o limite de payload para permitir importação em massa (ex: textos gigantes)
+  app.use(json({ limit: "50mb" }));
+  app.use(urlencoded({ extended: true, limit: "50mb" }));
 
   // 1. Prefixo Global: Faz todas as rotas começarem com /api
   // Isso resolve o conflito com a sua variável VITE_API_URL do frontend

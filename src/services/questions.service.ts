@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Question } from "../entities/question.entity";
+import { QuestionScope } from "../entities/question-scope.entity";
 import { User } from "../entities/user.entity";
 import { UserQuestionInteraction } from "../entities/user-question-interaction.entity";
 import { AnswerQuestionDto } from "../dto/answer-question.dto";
@@ -17,47 +18,112 @@ export class QuestionsService {
   constructor(
     @InjectRepository(Question)
     private questionRepository: Repository<Question>,
+    @InjectRepository(QuestionScope)
+    private scopeRepository: Repository<QuestionScope>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(UserQuestionInteraction)
     private interactionRepository: Repository<UserQuestionInteraction>,
-  ) {}
+    // eslint-disable-next-line prettier/prettier
+  ) { }
 
   async getQuestionsByCategory(categoryId: string) {
-    return this.questionRepository.find({ where: { categoryId } });
+    return this.scopeRepository.find({
+      where: { categoryId },
+      relations: ["questions"],
+      select: {
+        id: true,
+        text: true,
+        imageUrl: true,
+        questions: {
+          id: true,
+          type: true,
+          text: true,
+          subject: true,
+          optionA: true,
+          optionB: true,
+          optionC: true,
+          optionD: true,
+          optionE: true,
+          optionF: true,
+        },
+      },
+    });
   }
 
   async getQuestionsByExam(examId: string) {
-    return this.questionRepository.find({
+    return this.scopeRepository.find({
       where: { examId },
-      select: [
-        "id",
-        "categoryId",
-        "examId",
-        "text",
-        "subject",
-        "optionA",
-        "optionB",
-        "optionC",
-        "optionD",
-        "optionE",
-        "optionF",
-      ], // Do not send correctOption/explanation!
+      relations: ["questions"],
+      select: {
+        id: true,
+        text: true,
+        imageUrl: true,
+        questions: {
+          id: true,
+          type: true,
+          text: true,
+          subject: true,
+          optionA: true,
+          optionB: true,
+          optionC: true,
+          optionD: true,
+          optionE: true,
+          optionF: true,
+        },
+      },
     });
   }
 
   async answerQuestion(user: User, request: AnswerQuestionDto) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStr = new Date(
+      today.getTime() - today.getTimezoneOffset() * 60000,
+    )
+      .toISOString()
+      .split("T")[0];
 
-    const userLastErrorReset = new Date(user.lastErrorReset);
-    userLastErrorReset.setHours(0, 0, 0, 0);
+    let userResetStr = null;
+    if (user.lastErrorReset) {
+      const resetStr =
+        typeof user.lastErrorReset === "string"
+          ? user.lastErrorReset
+          : user.lastErrorReset.toISOString();
+      userResetStr = resetStr.split("T")[0];
+    }
 
-    // Reset daily errors if needed
-    if (userLastErrorReset.getTime() !== today.getTime()) {
+    // Reset daily errors se for um dia novo
+    if (userResetStr !== todayStr) {
       user.dailyErrors = 0;
       user.lastErrorReset = today;
-      await this.userRepository.save(user);
+    }
+
+    let lastLoginStr = null;
+    if (user.lastLoginDate) {
+      const loginDateStr =
+        typeof user.lastLoginDate === "string"
+          ? user.lastLoginDate
+          : user.lastLoginDate.toISOString();
+      lastLoginStr = loginDateStr.split("T")[0];
+    }
+
+    if (lastLoginStr !== todayStr) {
+      user.lastLoginDate = today;
+
+      if (lastLoginStr) {
+        const lastDate = new Date(lastLoginStr);
+        const currentDate = new Date(todayStr);
+        const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          user.consecutiveLoginDays = (user.consecutiveLoginDays || 0) + 1;
+        } else {
+          user.consecutiveLoginDays = 1;
+        }
+      } else {
+        user.consecutiveLoginDays = 1;
+      }
     }
 
     // Free Plan check
@@ -81,10 +147,17 @@ export class QuestionsService {
       question.correctOption.toLowerCase() ===
       request.selectedOption.toLowerCase();
 
-    if (!isCorrect && user.planType === "FREE") {
-      user.dailyErrors += 1;
-      await this.userRepository.save(user);
+    user.totalQuestionsAnswered = (user.totalQuestionsAnswered || 0) + 1;
+
+    if (isCorrect) {
+      user.totalQuestionsCorrect = (user.totalQuestionsCorrect || 0) + 1;
+    } else {
+      if (user.planType === "FREE") {
+        user.dailyErrors = (user.dailyErrors || 0) + 1;
+      }
     }
+
+    await this.userRepository.save(user);
 
     // Save interaction
     const interaction = this.interactionRepository.create({

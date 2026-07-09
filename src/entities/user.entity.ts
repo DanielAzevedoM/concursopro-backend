@@ -44,6 +44,21 @@ export class User {
   @Column({ name: "reset_code_expiry", type: "timestamp", nullable: true })
   resetCodeExpiry: Date | null;
 
+  @Column({ name: "total_questions_answered", default: 0 })
+  totalQuestionsAnswered: number;
+
+  @Column({ name: "total_questions_correct", default: 0 })
+  totalQuestionsCorrect: number;
+
+  @Column({ name: "total_questions_revised", default: 0 })
+  totalQuestionsRevised: number;
+
+  @Column({ name: "last_login_date", type: "date", nullable: true })
+  lastLoginDate: Date | null;
+
+  @Column({ name: "consecutive_login_days", default: 0 })
+  consecutiveLoginDays: number;
+
   @OneToMany(() => UserQuestionInteraction, (interaction) => interaction.user)
   interactions: UserQuestionInteraction[];
 

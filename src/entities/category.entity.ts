@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { Question } from "./question.entity";
+import { QuestionScope } from "./question-scope.entity";
 import { MockExam } from "./mock-exam.entity";
 import { Exam } from "./exam.entity";
 import { UserCategory } from "./user-category.entity";
@@ -15,8 +15,8 @@ export class Category {
   @Column({ type: "text", nullable: true })
   description: string;
 
-  @OneToMany(() => Question, (question) => question.category)
-  questions: Question[];
+  @OneToMany(() => QuestionScope, (questionScope) => questionScope.category)
+  questionScopes: QuestionScope[];
 
   @OneToMany(() => MockExam, (mockExam) => mockExam.category)
   mockExams: MockExam[];

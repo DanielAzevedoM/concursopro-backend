@@ -27,14 +27,14 @@ export class AdminCategoriesService {
     return this.examRepository
       .createQueryBuilder("exam")
       .leftJoinAndSelect("exam.category", "category")
-      .loadRelationCountAndMap("exam.questionsCount", "exam.questions")
+      .loadRelationCountAndMap("exam.questionsCount", "exam.questionScopes")
       .getMany();
   }
 
   async findOneExam(id: string) {
     return this.examRepository.findOne({
       where: { id },
-      relations: ["category", "questions"],
+      relations: ["category", "questionScopes"],
     });
   }
 

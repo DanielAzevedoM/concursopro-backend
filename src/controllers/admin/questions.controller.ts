@@ -11,7 +11,9 @@ import {
 import { AuthGuard } from "@nestjs/passport";
 import { AdminGuard } from "../../security/admin.guard";
 import { AdminQuestionsService } from "../../services/admin/questions.service";
+import { QuestionScope } from "../../entities/question-scope.entity";
 import { Question } from "../../entities/question.entity";
+import { DeepPartial } from "typeorm";
 
 @Controller("admin/questions")
 @UseGuards(AuthGuard("jwt"), AdminGuard)
@@ -25,8 +27,8 @@ export class AdminQuestionsController {
   }
 
   @Post("bulk")
-  createBulk(@Body("questions") questions: Partial<Question>[]) {
-    return this.adminQuestionsService.createBulk(questions);
+  createBulk(@Body("scopes") scopes: DeepPartial<QuestionScope>[]) {
+    return this.adminQuestionsService.createBulk(scopes);
   }
 
   @Delete(":id")
