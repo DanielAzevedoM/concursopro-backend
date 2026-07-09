@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { TransformInterceptor } from "./interceptors/transform.interceptor";
 import { json, urlencoded } from "express";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -38,11 +39,21 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // 4. Porta Dinâmica e Liberação de IP Externo (Crucial para a Hostinger)
+  // 4. Configuração do Swagger
+  const config = new DocumentBuilder()
+    .setTitle("ConcursoPro API")
+    .setDescription("Documentação interativa de todos os endpoints do backend")
+    .setVersion("1.0")
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("api/docs", app, document);
+
+  // 5. Porta Dinâmica e Liberação de IP Externo (Crucial para a Hostinger)
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
-  // 5. Roda as migrations APÓS o app já estar ouvindo a porta!
+  // 6. Roda as migrations APÓS o app já estar ouvindo a porta!
   // Isso impede que a Hostinger dê timeout de 3 segundos matando o app.
   try {
     const { DataSource } = await import("typeorm");
