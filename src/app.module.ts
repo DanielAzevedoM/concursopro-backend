@@ -26,7 +26,7 @@ import { AdminModule } from "./modules/admin.module";
         password: configService.get<string>("DB_PASSWORD"),
         database: configService.get<string>("DB_DATABASE"),
         entities: [__dirname + "/**/*.entity{.ts,.js}"],
-        migrationsRun: true, // Run migrations automatically
+        migrationsRun: false, // <-- DESATIVADO para acelerar o boot e evitar timeout da Hostinger
         migrations: [__dirname + "/migrations/*{.ts,.js}"],
         synchronize: false, // Don't synchronize since we manage schema via migrations
       }),

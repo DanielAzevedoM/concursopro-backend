@@ -36,6 +36,17 @@ async function bootstrap() {
   // 4. Porta Dinâmica e Liberação de IP Externo (Crucial para a Hostinger)
   const port = process.env.PORT || 3000;
   await app.listen(port);
+
+  // 5. Roda as migrations APÓS o app já estar ouvindo a porta!
+  // Isso impede que a Hostinger dê timeout de 3 segundos matando o app.
+  try {
+    const { DataSource } = await import("typeorm");
+    const dataSource = app.get(DataSource);
+    await dataSource.runMigrations();
+    console.log("Migrations executadas com sucesso após o boot!");
+  } catch (err) {
+    console.error("Erro ao rodar migrations:", err);
+  }
 }
 
 bootstrap().catch((err) => {
