@@ -75,6 +75,28 @@ export class QuestionsService {
     });
   }
 
+  async startQuestion(user: User, questionId: string) {
+    let interaction = await this.interactionRepository.findOne({
+      where: { userId: user.id, questionId },
+    });
+
+    if (!interaction) {
+      interaction = this.interactionRepository.create({
+        userId: user.id,
+        questionId,
+        startedAt: new Date(),
+        isCorrect: null, // Allow null since it's not answered yet
+      });
+      await this.interactionRepository.save(interaction);
+    } else if (interaction.isCorrect === null) {
+      // User refreshed or restarted before answering
+      interaction.startedAt = new Date();
+      await this.interactionRepository.save(interaction);
+    }
+
+    return { success: true, timeLimit: 20 };
+  }
+
   async answerQuestion(user: User, request: AnswerQuestionDto) {
     const today = new Date();
     const todayStr = new Date(
@@ -143,8 +165,29 @@ export class QuestionsService {
       throw new NotFoundException("Questão não encontrada");
     }
 
-    const isCorrect =
-      question.correctOption.toLowerCase() ===
+    const interaction = await this.interactionRepository.findOne({
+      where: { userId: user.id, questionId: request.questionId },
+    });
+
+    let forcedWrong = false;
+    let messageSuffix = "";
+
+    if (interaction && interaction.startedAt) {
+      const diffMs = today.getTime() - interaction.startedAt.getTime();
+      const diffSecs = diffMs / 1000;
+      if (diffSecs > 23 || request.selectedOption === "TIMEOUT") {
+        // 20s + 3s margin
+        forcedWrong = true;
+        messageSuffix = " (Tempo esgotado)";
+      }
+    } else if (request.selectedOption === "TIMEOUT") {
+      forcedWrong = true;
+      messageSuffix = " (Tempo esgotado)";
+    }
+
+    const isCorrect = forcedWrong
+      ? false
+      : question.correctOption.toLowerCase() ===
       request.selectedOption.toLowerCase();
 
     user.totalQuestionsAnswered = (user.totalQuestionsAnswered || 0) + 1;
@@ -160,18 +203,26 @@ export class QuestionsService {
     await this.userRepository.save(user);
 
     // Save interaction
-    const interaction = this.interactionRepository.create({
-      userId: user.id,
-      questionId: question.id,
-      isCorrect,
-    });
-    await this.interactionRepository.save(interaction);
+    if (interaction) {
+      interaction.isCorrect = isCorrect;
+      interaction.answeredAt = new Date();
+      await this.interactionRepository.save(interaction);
+    } else {
+      const newInteraction = this.interactionRepository.create({
+        userId: user.id,
+        questionId: question.id,
+        isCorrect,
+        answeredAt: new Date(),
+      });
+      await this.interactionRepository.save(newInteraction);
+    }
 
     const remainingLives =
       user.planType === "FREE"
         ? Math.max(0, this.MAX_DAILY_ERRORS_FREE - user.dailyErrors)
         : -1;
-    const message = isCorrect ? "Resposta correta!" : "Resposta incorreta.";
+    const message =
+      (isCorrect ? "Resposta correta!" : "Resposta incorreta.") + messageSuffix;
 
     return {
       isCorrect,

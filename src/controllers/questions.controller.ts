@@ -28,6 +28,15 @@ export class QuestionsController {
   }
 
   @UseGuards(AuthGuard("jwt"))
+  @Post("start")
+  startQuestion(
+    @Request() req: { user: User },
+    @Body("questionId") questionId: string,
+  ) {
+    return this.questionsService.startQuestion(req.user, questionId);
+  }
+
+  @UseGuards(AuthGuard("jwt"))
   @Post("answer")
   answerQuestion(
     @Request() req: { user: User },

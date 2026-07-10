@@ -30,11 +30,14 @@ export class UserQuestionInteraction {
   @JoinColumn({ name: "question_id" })
   question: Question;
 
-  @Column({ name: "is_correct" })
-  isCorrect: boolean;
+  @Column({ name: "is_correct", type: "boolean", nullable: true })
+  isCorrect: boolean | null;
 
   @Column({ name: "is_reviewed", default: false })
   isReviewed: boolean;
+
+  @Column({ name: "started_at", type: "timestamp", nullable: true })
+  startedAt: Date;
 
   @CreateDateColumn({
     name: "answered_at",
