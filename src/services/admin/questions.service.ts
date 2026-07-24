@@ -49,7 +49,21 @@ export class AdminQuestionsService {
   }
 
   async delete(id: string) {
+    const question = await this.findOne(id);
+    if (!question) return { success: false };
+
+    const scopeId = question.questionScopeId;
     await this.questionRepository.delete(id);
+
+    if (scopeId) {
+      const remainingQuestions = await this.questionRepository.count({
+        where: { questionScopeId: scopeId },
+      });
+      if (remainingQuestions === 0) {
+        await this.scopeRepository.delete(scopeId);
+      }
+    }
+
     return { success: true };
   }
 
@@ -60,8 +74,17 @@ export class AdminQuestionsService {
     });
   }
 
-  async update(id: string, data: Partial<Question>) {
-    await this.questionRepository.update(id, data);
+  async update(id: string, data: Partial<Question> & { baseText?: string }) {
+    const { baseText, ...questionData } = data;
+
+    const question = await this.findOne(id);
+    if (question && baseText !== undefined && question.questionScopeId) {
+      await this.scopeRepository.update(question.questionScopeId, {
+        text: baseText,
+      });
+    }
+
+    await this.questionRepository.update(id, questionData);
     return this.findOne(id);
   }
 }

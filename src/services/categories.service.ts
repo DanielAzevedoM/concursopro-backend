@@ -100,15 +100,23 @@ export class CategoriesService {
       exams:
         category.exams?.map((e) => {
           let questionsCount = 0;
+          const examSubjectsMap: Record<string, number> = {};
+
           e.questionScopes?.forEach((s) => {
-            questionsCount += s.questions?.length || 0;
+            s.questions?.forEach((q) => {
+              questionsCount++;
+              const subject = q.subject || "Outros";
+              examSubjectsMap[subject] = (examSubjectsMap[subject] || 0) + 1;
+            });
           });
+
           return {
             id: e.id,
             name: e.name,
             year: e.year,
             institution: e.institution,
             questionsCount,
+            subjects: examSubjectsMap,
           };
         }) || [],
       totalQuestions,

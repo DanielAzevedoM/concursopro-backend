@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -32,10 +33,31 @@ export class AdminCategoriesService {
   }
 
   async findOneExam(id: string) {
-    return this.examRepository.findOne({
+    const exam = await this.examRepository.findOne({
       where: { id },
-      relations: ["category", "questionScopes"],
+      relations: ["category", "questionScopes", "questionScopes.questions"],
     });
+
+    if (exam) {
+      const allQuestions: any[] = [];
+      exam.questionScopes?.forEach((scope) => {
+        if (scope.questions) {
+          scope.questions.forEach((q) => {
+            allQuestions.push({
+              ...q,
+              scope: {
+                id: scope.id,
+                text: scope.text,
+                imageUrl: scope.imageUrl,
+              },
+            });
+          });
+        }
+      });
+      (exam as any).questions = allQuestions;
+    }
+
+    return exam;
   }
 
   async createExam(data: Partial<Exam>) {
