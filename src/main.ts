@@ -18,13 +18,41 @@ async function bootstrap() {
 
   // 2. Configuração de CORS corrigida (com OPTIONS e PATCH)
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL,
-      process.env.ADMIN_FRONTEND_URL,
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:5175",
-    ].filter((url): url is string => !!url),
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        process.env.ADMIN_FRONTEND_URL,
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+      ]
+        .filter((url): url is string => !!url)
+        .map((url) => url.replace(/\/$/, "")); // Remove trailing slash if exists
+
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const isAllowed = allowedOrigins.some((allowed) => {
+        if (allowed === origin) return true;
+        // Allow www version if non-www is specified, and vice-versa
+        const withWww = allowed.includes("://www.")
+          ? allowed
+          : allowed.replace("://", "://www.");
+        const withoutWww = allowed.replace("://www.", "://");
+        return origin === withWww || origin === withoutWww;
+      });
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        console.warn(`Origem bloqueada pelo CORS: ${origin}`);
+        callback(null, false);
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     credentials: true,
   });
